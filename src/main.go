@@ -10,34 +10,41 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	timeutil "mockserver.jiratviriyataranon.io/src/util"
 )
 
 func main() {
-	err := run(context.Background(), os.Getenv)
+	err := godotenv.Load(fmt.Sprintf(".%v.env", os.Args[1]))
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("Error loading .env file: %v", err)
 		os.Exit(1)
 	}
+
+	err = run(context.Background(), os.Getenv)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
 	os.Exit(0)
 }
 
 func run(ctx context.Context, getEnv func(string) string) error {
+	address := net.JoinHostPort(getEnv("SERVER_HOST"), getEnv("SERVER_PORT"))
 	serverCtx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
-
 	server := &http.Server{
-		Addr:        net.JoinHostPort(getEnv("SERVER_HOST"), getEnv("SERVER_PORT")),
+		Addr:        address,
 		BaseContext: func(net.Listener) context.Context { return serverCtx },
 	}
 
-	shutdownErr := make(chan error)
-
-	gracePeriod, err := strconv.Atoi(getEnv("SHUTDOWN_GRACE_PERIOD"))
+	gracePeriod, err := strconv.Atoi(getEnv("SHUTDOWN_GRACE_PERIOD_SECONDS"))
 	if err != nil {
-		return fmt.Errorf("Error while parsing environment variables: %w", err)
+		return fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
+	shutdownErr := make(chan error)
 	go func() {
 		<-serverCtx.Done()
 
@@ -48,15 +55,15 @@ func run(ctx context.Context, getEnv func(string) string) error {
 		shutdownErr <- server.Shutdown(shutdownCtx)
 	}()
 
-	fmt.Printf("Starting server at %v\n", net.JoinHostPort(getEnv("SERVER_HOST"), getEnv("SERVER_PORT")))
+	fmt.Printf("Starting server at %v\n", address)
 	err = server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		return fmt.Errorf("Error while starting server: %w", err)
+		return fmt.Errorf("Error starting server: %w", err)
 	}
 
 	err = <-shutdownErr
 	if err != nil {
-		return fmt.Errorf("Error while shutting down server: %w", err)
+		return fmt.Errorf("Error shutting down server: %w", err)
 	}
 
 	fmt.Println("Server shut down")
