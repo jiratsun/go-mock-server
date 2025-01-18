@@ -6,6 +6,8 @@ import (
 )
 
 func Sql(getEnv func(string) string) (sqlConfig, error) {
+	address := getEnv("SQL_SOURCE_NAME")
+
 	maxIdleConns, err := strconv.Atoi(getEnv("SQL_MAX_IDLE_CONNS"))
 	if err != nil {
 		return sqlConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
@@ -26,5 +28,11 @@ func Sql(getEnv func(string) string) (sqlConfig, error) {
 		return sqlConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
-	return sqlConfig{maxIdleConns, maxOpenConns, maxIdleTimeSeconds, maxLifeTimeSeconds}, nil
+	return sqlConfig{
+		Address:            address,
+		MaxIdleConns:       maxIdleConns,
+		MaxOpenConns:       maxOpenConns,
+		MaxIdleTimeSeconds: maxIdleTimeSeconds,
+		MaxLifeTimeSeconds: maxLifeTimeSeconds,
+	}, nil
 }

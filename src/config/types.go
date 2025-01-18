@@ -8,6 +8,7 @@ type serverConfig struct {
 }
 
 type sqlConfig struct {
+	Address            string
 	MaxIdleConns       int
 	MaxOpenConns       int
 	MaxIdleTimeSeconds int
