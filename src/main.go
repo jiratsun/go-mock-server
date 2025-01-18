@@ -14,7 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"mockserver.jiratviriyataranon.io/src/core/path"
 	"mockserver.jiratviriyataranon.io/src/setup"
-	timeutil "mockserver.jiratviriyataranon.io/src/time"
+	"mockserver.jiratviriyataranon.io/src/time"
 )
 
 func main() {
@@ -60,7 +60,7 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	go func() {
 		<-serverCtx.Done()
 
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), timeutil.OfSeconds(gracePeriod))
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.OfSeconds(gracePeriod))
 		defer cancel()
 
 		fmt.Println("Shutting down server")
