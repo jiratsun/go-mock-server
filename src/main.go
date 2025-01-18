@@ -7,14 +7,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"mockserver.jiratviriyataranon.io/src/config"
 	"mockserver.jiratviriyataranon.io/src/core/path"
 	"mockserver.jiratviriyataranon.io/src/initialize"
-	"mockserver.jiratviriyataranon.io/src/time"
 )
 
 func main() {
@@ -34,7 +33,10 @@ func main() {
 }
 
 func run(ctx context.Context, getEnv func(string) string) error {
-	address := net.JoinHostPort(getEnv("SERVER_HOST"), getEnv("SERVER_PORT"))
+	serverConfig, err := config.Server(getEnv)
+	if err != nil {
+		return fmt.Errorf("Error getting server configs: %w", err)
+	}
 
 	serverCtx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
@@ -45,14 +47,9 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	}
 
 	server := &http.Server{
-		Addr:        address,
+		Addr:        serverConfig.Address,
 		BaseContext: func(net.Listener) context.Context { return serverCtx },
 		Handler:     handler,
-	}
-
-	gracePeriod, err := strconv.Atoi(getEnv("SHUTDOWN_GRACE_PERIOD_SECONDS"))
-	if err != nil {
-		return fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
 	shutdownErr := make(chan error)
@@ -60,14 +57,14 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	go func() {
 		<-serverCtx.Done()
 
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.OfSeconds(gracePeriod))
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), serverConfig.GracePeriod)
 		defer cancel()
 
 		fmt.Println("Shutting down server")
 		shutdownErr <- server.Shutdown(shutdownCtx)
 	}()
 
-	fmt.Printf("Starting server at %v\n", address)
+	fmt.Printf("Starting server at %v\n", serverConfig.Address)
 	err = server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("Error starting server: %w", err)
