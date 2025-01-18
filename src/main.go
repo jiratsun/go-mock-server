@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
-	"mockserver.jiratviriyataranon.io/src/path"
+	"mockserver.jiratviriyataranon.io/src/core/path"
 	"mockserver.jiratviriyataranon.io/src/setup"
 	timeutil "mockserver.jiratviriyataranon.io/src/time"
 )

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"mockserver.jiratviriyataranon.io/src/path"
+	"mockserver.jiratviriyataranon.io/src/core/path"
 )
 
 func route(
