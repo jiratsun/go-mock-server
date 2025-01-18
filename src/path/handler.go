@@ -2,7 +2,9 @@ package path
 
 import "net/http"
 
-type PathHandler struct{}
+type PathHandler struct {
+	Store *PathStore
+}
 
 func (handler *PathHandler) HandleDelete(w http.ResponseWriter, r *http.Request) {
 }

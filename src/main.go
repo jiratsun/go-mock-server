@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"mockserver.jiratviriyataranon.io/src/path"
+	"mockserver.jiratviriyataranon.io/src/setup"
 	timeutil "mockserver.jiratviriyataranon.io/src/time"
 )
 
@@ -34,12 +35,19 @@ func main() {
 
 func run(ctx context.Context, getEnv func(string) string) error {
 	address := net.JoinHostPort(getEnv("SERVER_HOST"), getEnv("SERVER_PORT"))
+
 	serverCtx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
+
+	handler, err := SetUpHandler(serverCtx, getEnv)
+	if err != nil {
+		return fmt.Errorf("Error setting up handler: %w", err)
+	}
+
 	server := &http.Server{
 		Addr:        address,
 		BaseContext: func(net.Listener) context.Context { return serverCtx },
-		Handler:     newServer(serverCtx, getEnv),
+		Handler:     handler,
 	}
 
 	gracePeriod, err := strconv.Atoi(getEnv("SHUTDOWN_GRACE_PERIOD_SECONDS"))
@@ -48,6 +56,7 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	}
 
 	shutdownErr := make(chan error)
+
 	go func() {
 		<-serverCtx.Done()
 
@@ -73,11 +82,18 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	return nil
 }
 
-func newServer(ctx context.Context, getEnv func(string) string) http.Handler {
-	pathHandler := &path.PathHandler{}
+func SetUpHandler(ctx context.Context, getEnv func(string) string) (http.Handler, error) {
+	sqlPool, err := setup.SqlPool(ctx, getEnv)
+	if err != nil {
+		return nil, fmt.Errorf("Error setting up SQL: %w", err)
+	}
+
+	pathStore := &path.PathStore{SqlPool: sqlPool}
+
+	pathHandler := &path.PathHandler{Store: pathStore}
 
 	return route(
 		chi.NewRouter(),
 		pathHandler,
-	)
+	), nil
 }
