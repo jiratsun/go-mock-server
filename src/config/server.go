@@ -3,21 +3,19 @@ package config
 import (
 	"fmt"
 	"net"
-	"strconv"
-
-	"mockserver.jiratviriyataranon.io/src/time"
+	"time"
 )
 
 func Server(getEnv func(string) string) (serverConfig, error) {
 	address := net.JoinHostPort(getEnv("SERVER_HOST"), getEnv("SERVER_PORT"))
 
-	gracePeriod, err := strconv.Atoi(getEnv("SHUTDOWN_GRACE_PERIOD_SECONDS"))
+	gracePeriod, err := time.ParseDuration(getEnv("SHUTDOWN_GRACE_PERIOD"))
 	if err != nil {
 		return serverConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
 	return serverConfig{
 		Address:     address,
-		GracePeriod: time.OfSeconds(gracePeriod),
+		GracePeriod: gracePeriod,
 	}, nil
 }

@@ -8,9 +8,9 @@ type serverConfig struct {
 }
 
 type sqlConfig struct {
-	Address            string
-	MaxIdleConns       int
-	MaxOpenConns       int
-	MaxIdleTimeSeconds int
-	MaxLifeTimeSeconds int
+	Address      string
+	MaxIdleConns int
+	MaxOpenConns int
+	MaxIdleTime  time.Duration
+	MaxLifeTime  time.Duration
 }

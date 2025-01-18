@@ -7,7 +7,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"mockserver.jiratviriyataranon.io/src/config"
-	"mockserver.jiratviriyataranon.io/src/time"
 )
 
 func SqlPool(ctx context.Context, getEnv func(string) string) (*sql.DB, error) {
@@ -25,8 +24,8 @@ func SqlPool(ctx context.Context, getEnv func(string) string) (*sql.DB, error) {
 
 	sqlPool.SetMaxIdleConns(sqlConfig.MaxIdleConns)
 	sqlPool.SetMaxOpenConns(sqlConfig.MaxOpenConns)
-	sqlPool.SetConnMaxIdleTime(time.OfSeconds(sqlConfig.MaxIdleTimeSeconds))
-	sqlPool.SetConnMaxLifetime(time.OfSeconds(sqlConfig.MaxLifeTimeSeconds))
+	sqlPool.SetConnMaxIdleTime(sqlConfig.MaxIdleTime)
+	sqlPool.SetConnMaxLifetime(sqlConfig.MaxLifeTime)
 
 	return sqlPool, nil
 }

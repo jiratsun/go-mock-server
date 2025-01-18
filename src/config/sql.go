@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strconv"
+	"time"
 )
 
 func Sql(getEnv func(string) string) (sqlConfig, error) {
@@ -18,21 +19,21 @@ func Sql(getEnv func(string) string) (sqlConfig, error) {
 		return sqlConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
-	maxIdleTimeSeconds, err := strconv.Atoi(getEnv("SQL_MAX_IDLE_TIME_SECONDS"))
+	maxIdleTime, err := time.ParseDuration(getEnv("SQL_MAX_IDLE_TIME"))
 	if err != nil {
 		return sqlConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
-	maxLifeTimeSeconds, err := strconv.Atoi(getEnv("SQL_MAX_LIFE_TIME_SECONDS"))
+	maxLifeTime, err := time.ParseDuration(getEnv("SQL_MAX_LIFE_TIME"))
 	if err != nil {
 		return sqlConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
 	return sqlConfig{
-		Address:            address,
-		MaxIdleConns:       maxIdleConns,
-		MaxOpenConns:       maxOpenConns,
-		MaxIdleTimeSeconds: maxIdleTimeSeconds,
-		MaxLifeTimeSeconds: maxLifeTimeSeconds,
+		Address:      address,
+		MaxIdleConns: maxIdleConns,
+		MaxOpenConns: maxOpenConns,
+		MaxIdleTime:  maxIdleTime,
+		MaxLifeTime:  maxLifeTime,
 	}, nil
 }
