@@ -10,7 +10,9 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"mockserver.jiratviriyataranon.io/src/path"
 	timeutil "mockserver.jiratviriyataranon.io/src/util"
 )
 
@@ -37,6 +39,7 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	server := &http.Server{
 		Addr:        address,
 		BaseContext: func(net.Listener) context.Context { return serverCtx },
+		Handler:     newServer(serverCtx, getEnv),
 	}
 
 	gracePeriod, err := strconv.Atoi(getEnv("SHUTDOWN_GRACE_PERIOD_SECONDS"))
@@ -68,4 +71,13 @@ func run(ctx context.Context, getEnv func(string) string) error {
 
 	fmt.Println("Server shut down")
 	return nil
+}
+
+func newServer(ctx context.Context, getEnv func(string) string) http.Handler {
+	pathHandler := &path.PathHandler{}
+
+	return route(
+		chi.NewRouter(),
+		pathHandler,
+	)
 }
