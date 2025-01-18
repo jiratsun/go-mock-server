@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"mockserver.jiratviriyataranon.io/src/core/path"
-	"mockserver.jiratviriyataranon.io/src/setup"
+	"mockserver.jiratviriyataranon.io/src/initialize"
 	"mockserver.jiratviriyataranon.io/src/time"
 )
 
@@ -39,7 +39,7 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	serverCtx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
-	handler, err := SetUpHandler(serverCtx, getEnv)
+	handler, err := initializeHandler(serverCtx, getEnv)
 	if err != nil {
 		return fmt.Errorf("Error setting up handler: %w", err)
 	}
@@ -82,8 +82,8 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	return nil
 }
 
-func SetUpHandler(ctx context.Context, getEnv func(string) string) (http.Handler, error) {
-	sqlPool, err := setup.SqlPool(ctx, getEnv)
+func initializeHandler(ctx context.Context, getEnv func(string) string) (http.Handler, error) {
+	sqlPool, err := initialize.SqlPool(ctx, getEnv)
 	if err != nil {
 		return nil, fmt.Errorf("Error setting up SQL: %w", err)
 	}
