@@ -27,5 +27,13 @@ func SqlPool(ctx context.Context, getEnv func(string) string) (*sql.DB, error) {
 	sqlPool.SetConnMaxIdleTime(sqlConfig.MaxIdleTime)
 	sqlPool.SetConnMaxLifetime(sqlConfig.MaxLifeTime)
 
+	pingCtx, cancel := context.WithTimeout(ctx, sqlConfig.InitialConnectTimeout)
+	defer cancel()
+
+	err = sqlPool.PingContext(pingCtx)
+	if err != nil {
+		return nil, fmt.Errorf("Error pinging SQL server: %w", err)
+	}
+
 	return sqlPool, nil
 }

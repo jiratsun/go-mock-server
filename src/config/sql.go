@@ -29,11 +29,17 @@ func Sql(getEnv func(string) string) (sqlConfig, error) {
 		return sqlConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
 	}
 
+	initialConnectTimeout, err := time.ParseDuration(getEnv("SQL_INITIAL_CONNECT_TIMEOUT"))
+	if err != nil {
+		return sqlConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
+	}
+
 	return sqlConfig{
-		Address:      address,
-		MaxIdleConns: maxIdleConns,
-		MaxOpenConns: maxOpenConns,
-		MaxIdleTime:  maxIdleTime,
-		MaxLifeTime:  maxLifeTime,
+		Address:               address,
+		MaxIdleConns:          maxIdleConns,
+		MaxOpenConns:          maxOpenConns,
+		MaxIdleTime:           maxIdleTime,
+		MaxLifeTime:           maxLifeTime,
+		InitialConnectTimeout: initialConnectTimeout,
 	}, nil
 }
