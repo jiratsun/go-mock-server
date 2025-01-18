@@ -2,10 +2,10 @@ package timeutil
 
 import "time"
 
-func OfSeconds(value int64) time.Duration {
+func OfSeconds(value int) time.Duration {
 	return time.Second * time.Duration(value)
 }
 
-func OfMillis(value int64) time.Duration {
+func OfMillis(value int) time.Duration {
 	return time.Millisecond * time.Duration(value)
 }
