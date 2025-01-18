@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"mockserver.jiratviriyataranon.io/src/path"
-	timeutil "mockserver.jiratviriyataranon.io/src/util"
+	timeutil "mockserver.jiratviriyataranon.io/src/time"
 )
 
 func main() {
