@@ -16,6 +16,6 @@ type pathToHostUpsertMany struct {
 	host string
 }
 
-type pathRequest struct {
+type registerPathRequest struct {
 	PathToHost map[string]string
 }

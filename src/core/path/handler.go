@@ -1,9 +1,10 @@
 package path
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"mockserver.jiratviriyataranon.io/src/data"
 )
 
 type PathHandler struct {
@@ -18,10 +19,16 @@ func (handler *PathHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *http.Request) {
-	request, err := decode[pathRequest](r)
+	request, err := data.Decode[registerPathRequest](r)
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		data.Encode(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	problems := request.valid(r.Context())
+	if len(problems) > 0 {
+		data.Encode(w, http.StatusBadRequest, problems)
+		return
 	}
 
 	var dto []pathToHostUpsertMany
@@ -31,19 +38,10 @@ func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *h
 
 	err = handler.Store.upsertMany(r.Context(), dto)
 	if err != nil {
-		err = fmt.Errorf("Error inserting to SQL: %w", err)
-		fmt.Printf("%v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		err = fmt.Errorf("Error upserting SQL: %w", err)
+		data.Encode(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	w.Write([]byte("Success 1000"))
-}
-
-func decode[T any](r *http.Request) (T, error) {
-	var v T
-	err := json.NewDecoder(r.Body).Decode(&v)
-	if err != nil {
-		return v, fmt.Errorf("Error decoding JSON: %w", err)
-	}
-	return v, nil
+	data.Encode(w, http.StatusOK, "Success")
 }
