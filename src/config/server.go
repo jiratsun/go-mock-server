@@ -11,7 +11,7 @@ func Server(getEnv func(string) string) (serverConfig, error) {
 
 	gracePeriod, err := time.ParseDuration(getEnv("SHUTDOWN_GRACE_PERIOD"))
 	if err != nil {
-		return serverConfig{}, fmt.Errorf("Error parsing environment variables: %w", err)
+		return serverConfig{}, fmt.Errorf("Error parsing SHUTDOWN_GRACE_PERIOD: %w", err)
 	}
 
 	return serverConfig{
