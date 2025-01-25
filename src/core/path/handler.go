@@ -1,6 +1,7 @@
 package path
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -21,13 +22,14 @@ func (handler *PathHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *http.Request) {
 	request, err := data.Decode[registerPathRequest](r)
 	if err != nil {
-		data.Encode(w, http.StatusBadRequest, err.Error())
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse(err, nil))
 		return
 	}
 
 	problems := request.valid(r.Context())
 	if len(problems) > 0 {
-		data.Encode(w, http.StatusBadRequest, problems)
+		err = errors.New("Invalid request body")
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse(err, problems))
 		return
 	}
 
@@ -39,9 +41,9 @@ func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *h
 	err = handler.Store.upsertMany(r.Context(), dto)
 	if err != nil {
 		err = fmt.Errorf("Error upserting SQL: %w", err)
-		data.Encode(w, http.StatusInternalServerError, err.Error())
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse(err, nil))
 		return
 	}
 
-	data.Encode(w, http.StatusOK, "Success")
+	data.Encode(w, http.StatusOK, data.SuccessResponse())
 }
