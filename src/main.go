@@ -85,7 +85,7 @@ func initializeHandler(ctx context.Context, getEnv func(string) string) (http.Ha
 		return nil, fmt.Errorf("Error setting up SQL: %w", err)
 	}
 
-	pathStore := &path.PathStore{SqlPool: sqlPool}
+	pathStore := &path.PathStore{SqlPool: sqlPool, GetEnv: getEnv}
 
 	pathHandler := &path.PathHandler{Store: pathStore}
 

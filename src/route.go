@@ -15,7 +15,7 @@ func route(
 	configRouter.Route("/path", func(r chi.Router) {
 		r.Delete("/", pathHandler.HandleDelete)
 		r.Get("/", pathHandler.HandleGet)
-		r.Post("/", pathHandler.HandlePost)
+		r.Post("/", pathHandler.HandleRegisterPathToHost)
 	})
 
 	router.Mount("/v1/config", configRouter)
