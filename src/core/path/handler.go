@@ -16,6 +16,18 @@ func (handler *PathHandler) HandleDelete(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *PathHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
+	result, err := handler.Store.findAll(r.Context())
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	response := make(getPathResponse)
+	for _, pathToHost := range result {
+		response[pathToHost.path] = getPathInfo{Host: pathToHost.host, IsActive: pathToHost.isActive}
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))
 }
 
 func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *http.Request) {

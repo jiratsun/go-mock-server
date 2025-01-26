@@ -42,3 +42,42 @@ func (store *PathStore) upsertMany(ctx context.Context, pathToHost []pathToHostU
 
 	return nil
 }
+
+func (store *PathStore) findAll(ctx context.Context) ([]pathToHost, error) {
+	query := "SELECT * FROM path_to_host"
+	result := make([]pathToHost, 0)
+
+	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
+	if err != nil {
+		return result, fmt.Errorf("Error parsing SQL_READ_TIMEOUT: %w", err)
+	}
+
+	queryCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	rows, err := store.SqlPool.QueryContext(queryCtx, query)
+	if err != nil {
+		return result, fmt.Errorf("Error reading from database: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pathToHost pathToHost
+
+		err := rows.Scan(
+			&pathToHost.id,
+			&pathToHost.path,
+			&pathToHost.host,
+			&pathToHost.isActive,
+			&pathToHost.createdAt,
+			&pathToHost.updatedAt,
+		)
+		if err != nil {
+			return result, fmt.Errorf("Error parsing rows: %w", err)
+		}
+
+		result = append(result, pathToHost)
+	}
+
+	return result, nil
+}

@@ -19,3 +19,10 @@ type pathToHostUpsertMany struct {
 type registerPathRequest struct {
 	PathToHost map[string]string
 }
+
+type getPathResponse map[string]getPathInfo
+
+type getPathInfo struct {
+	Host     string
+	IsActive bool
+}
