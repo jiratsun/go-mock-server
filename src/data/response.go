@@ -1,9 +1,13 @@
 package data
 
-func ErrorResponse(err error, additionalInfo any) GeneralResponse {
-	return GeneralResponse{Status: err.Error(), AdditionalInfo: additionalInfo}
+func ErrorResponse[T any](err error, additionalInfo any, data T) GeneralResponse[T] {
+	return GeneralResponse[T]{
+		Status: err.Error(), AdditionalInfo: additionalInfo, Data: data,
+	}
 }
 
-func SuccessResponse() GeneralResponse {
-	return GeneralResponse{Status: "Success"}
+func SuccessResponse[T any](additionalInfo any, data T) GeneralResponse[T] {
+	return GeneralResponse[T]{
+		Status: "Success", Data: data,
+	}
 }
