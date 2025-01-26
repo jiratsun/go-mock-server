@@ -27,13 +27,18 @@ func (store *PathStore) upsertMany(ctx context.Context, pathToHost []pathToHostU
 		args = append(args, row.path, row.host)
 	}
 
-	timeout, err := time.ParseDuration(store.GetEnv("SQL_INSERT_TIMEOUT"))
+	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
 	if err != nil {
-		return fmt.Errorf("Error parsing SQL_INSERT_TIMEOUT: %w", err)
+		return fmt.Errorf("Error parsing SQL_WRITE_TIMEOUT: %w", err)
 	}
 
 	queryCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	return store.SqlPool.QueryRowContext(queryCtx, query.String(), args...).Err()
+	err = store.SqlPool.QueryRowContext(queryCtx, query.String(), args...).Err()
+	if err != nil {
+		return fmt.Errorf("Error writing to database: %w", err)
+	}
+
+	return nil
 }

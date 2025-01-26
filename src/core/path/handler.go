@@ -2,7 +2,6 @@ package path
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"mockserver.jiratviriyataranon.io/src/data"
@@ -40,7 +39,6 @@ func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *h
 
 	err = handler.Store.upsertMany(r.Context(), dto)
 	if err != nil {
-		err = fmt.Errorf("Error upserting SQL: %w", err)
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse(err, nil))
 		return
 	}
