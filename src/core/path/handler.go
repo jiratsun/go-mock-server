@@ -45,7 +45,7 @@ func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *h
 	}
 
 	var dto []pathToHostUpsertMany
-	for k, v := range request.PathToHost {
+	for k, v := range request {
 		dto = append(dto, pathToHostUpsertMany{path: k, host: v})
 	}
 
