@@ -1,4 +1,4 @@
-package host
+package config
 
 import (
 	"context"
@@ -10,12 +10,12 @@ import (
 	"mockserver.jiratviriyataranon.io/src/strings"
 )
 
-type HostStore struct {
+type ConfigStore struct {
 	SqlPool *sql.DB
 	GetEnv  func(string) string
 }
 
-func (store *HostStore) findAllWithPath(ctx context.Context) ([]hostWithPath, error) {
+func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, error) {
 	var query strings.StringBuilder
 	query.WriteStringln("SELECT * FROM host")
 	query.WriteString("JOIN path_to_host ON host.alias = path_to_host.host_alias")
@@ -62,7 +62,7 @@ func (store *HostStore) findAllWithPath(ctx context.Context) ([]hostWithPath, er
 	return result, nil
 }
 
-func (store *HostStore) upsertMany(ctx context.Context, aliasToHost []aliasToHostUpsertMany) error {
+func (store *ConfigStore) upsertMany(ctx context.Context, aliasToHost []aliasToHostUpsertMany) error {
 	var query strings.StringBuilder
 	query.WriteStringln("INSERT INTO host (alias, host) VALUES")
 	query.WriteStringlnRepeat("(?, ?),", i.Dec(len(aliasToHost)))
@@ -90,7 +90,7 @@ func (store *HostStore) upsertMany(ctx context.Context, aliasToHost []aliasToHos
 	return nil
 }
 
-func (store *HostStore) upsertManyPath(ctx context.Context, pathToHost []pathToHostUpsertMany) error {
+func (store *ConfigStore) upsertManyPath(ctx context.Context, pathToHost []pathToHostUpsertMany) error {
 	var query strings.StringBuilder
 	query.WriteStringln("INSERT INTO path_to_host (path, host_alias) VALUES")
 	query.WriteStringlnRepeat("(?, ?),", i.Dec(len(pathToHost)))
