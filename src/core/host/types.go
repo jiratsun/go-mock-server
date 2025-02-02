@@ -2,8 +2,11 @@ package host
 
 import (
 	"time"
+
+	"mockserver.jiratviriyataranon.io/src/data"
 )
 
+// DB Schema
 type hostWithPath struct {
 	id             int
 	host           string
@@ -19,13 +22,32 @@ type hostWithPath struct {
 	path_updatedAt time.Time
 }
 
+type pathToHost struct {
+	id        int
+	path      string
+	hostAlias string
+	isActive  bool
+	createdAt time.Time
+	updatedAt time.Time
+}
+
+// DTO
 type aliasToHostUpsertMany struct {
 	alias string
 	host  string
 }
 
+type pathToHostUpsertMany struct {
+	path      string
+	hostAlias string
+}
+
+// Request
 type registerhostRequest map[string]string
 
+type registerPathRequest map[string]data.StringOrSlice
+
+// Response
 type getHostResponse map[string]*hostInfo
 
 type hostInfo struct {

@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 func (request registerhostRequest) valid(ctx context.Context) map[string]string {
@@ -20,9 +21,30 @@ func (request registerhostRequest) valid(ctx context.Context) map[string]string 
 			problems[key] = err.Error()
 		}
 
-		err = ValidateAlias(alias)
+		err = validateAlias(alias)
 		if err != nil {
 			problems[key] = err.Error()
+		}
+	}
+
+	return problems
+}
+
+func (request registerPathRequest) valid(ctx context.Context) map[string]string {
+	problems := make(map[string]string)
+
+	for hostAlias, paths := range request {
+		err := validateAlias(hostAlias)
+		if err != nil {
+			problems[hostAlias] = err.Error()
+		}
+
+		for _, path := range paths {
+			err = validatePath(path)
+			if err != nil {
+				key := fmt.Sprintf("%v: %v", hostAlias, path)
+				problems[key] = err.Error()
+			}
 		}
 	}
 
@@ -51,13 +73,26 @@ func validateAuthority(authority string) error {
 	return nil
 }
 
-func ValidateAlias(alias string) error {
+func validateAlias(alias string) error {
 	if alias == "" {
 		return errors.New("Invalid alias: empty")
 	}
 
 	charValidator := regexp.MustCompile(`^([\w\-]*)?$`)
 	if !charValidator.MatchString(alias) {
+		return errors.New("Invalid path: invalid characters")
+	}
+
+	return nil
+}
+
+func validatePath(path string) error {
+	if path != "" && !strings.HasPrefix(path, "/") {
+		return errors.New("Invalid path: should be empty or begins with /")
+	}
+
+	charValidator := regexp.MustCompile(`^(/[\w\-./]*)?$`)
+	if !charValidator.MatchString(path) {
 		return errors.New("Invalid path: invalid characters")
 	}
 
