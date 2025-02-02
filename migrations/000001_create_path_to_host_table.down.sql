@@ -1,1 +1,3 @@
 DROP TABLE IF EXISTS path_to_host;
+
+DROP TABLE IF EXISTS host;
