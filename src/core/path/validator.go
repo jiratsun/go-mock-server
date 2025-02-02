@@ -4,52 +4,31 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
-	"net/url"
 	"regexp"
 	"strings"
+
+	"mockserver.jiratviriyataranon.io/src/core/host"
 )
 
 func (request registerPathRequest) valid(ctx context.Context) map[string]string {
 	problems := make(map[string]string)
 
-	for path, authority := range request {
-		key := fmt.Sprintf("%v: %v", path, authority)
-
-		err := validateAuthority(authority)
+	for hostAlias, paths := range request {
+		err := host.ValidateAlias(hostAlias)
 		if err != nil {
-			problems[key] = err.Error()
+			problems[hostAlias] = err.Error()
 		}
 
-		err = validatePath(path)
-		if err != nil {
-			problems[key] = err.Error()
+		for _, path := range paths {
+			err = validatePath(path)
+			if err != nil {
+				key := fmt.Sprintf("%v: %v", hostAlias, path)
+				problems[key] = err.Error()
+			}
 		}
 	}
 
 	return problems
-}
-
-func validateAuthority(authority string) error {
-	parsedAuthority, err := url.Parse(authority)
-	if err != nil {
-		return fmt.Errorf("Invalid authority: %w", err)
-	}
-
-	if parsedAuthority.Scheme == "" {
-		return errors.New("Invalid authority: empty scheme")
-	}
-
-	host, _, err := net.SplitHostPort(parsedAuthority.Host)
-	if err != nil {
-		host = parsedAuthority.Host
-	}
-
-	if host == "" {
-		return errors.New("Invalid authority: empty host")
-	}
-
-	return nil
 }
 
 func validatePath(path string) error {

@@ -24,7 +24,7 @@ func (handler *PathHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 
 	response := make(getPathResponse)
 	for _, pathToHost := range result {
-		response[pathToHost.path] = pathInfo{Host: pathToHost.host_alias, IsActive: pathToHost.isActive}
+		response[pathToHost.path] = pathInfo{Host: pathToHost.hostAlias, IsActive: pathToHost.isActive}
 	}
 
 	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))
@@ -45,8 +45,10 @@ func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *h
 	}
 
 	var dto []pathToHostUpsertMany
-	for k, v := range request {
-		dto = append(dto, pathToHostUpsertMany{path: k, host_alias: v})
+	for hostAlias, paths := range request {
+		for _, path := range paths {
+			dto = append(dto, pathToHostUpsertMany{path: path, hostAlias: hostAlias})
+		}
 	}
 
 	err = handler.Store.upsertMany(r.Context(), dto)

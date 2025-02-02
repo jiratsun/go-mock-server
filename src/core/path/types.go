@@ -1,22 +1,26 @@
 package path
 
-import "time"
+import (
+	"time"
+
+	"mockserver.jiratviriyataranon.io/src/data"
+)
 
 type pathToHost struct {
-	id         int
-	path       string
-	host_alias string
-	isActive   bool
-	createdAt  time.Time
-	updatedAt  time.Time
+	id        int
+	path      string
+	hostAlias string
+	isActive  bool
+	createdAt time.Time
+	updatedAt time.Time
 }
 
 type pathToHostUpsertMany struct {
-	path       string
-	host_alias string
+	path      string
+	hostAlias string
 }
 
-type registerPathRequest map[string]string
+type registerPathRequest map[string]data.StringOrSlice
 
 type getPathResponse map[string]pathInfo
 
@@ -24,3 +28,4 @@ type pathInfo struct {
 	Host     string
 	IsActive bool
 }
+

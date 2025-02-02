@@ -17,14 +17,14 @@ type PathStore struct {
 
 func (store *PathStore) upsertMany(ctx context.Context, pathToHost []pathToHostUpsertMany) error {
 	var query strings.StringBuilder
-	query.WriteStringln("INSERT INTO path_to_host (path, host) VALUES")
+	query.WriteStringln("INSERT INTO path_to_host (path, host_alias) VALUES")
 	query.WriteStringlnRepeat("(?, ?),", i.Dec(len(pathToHost)))
 	query.WriteStringln("(?, ?) AS new")
-	query.WriteString("ON DUPLICATE KEY UPDATE host=new.host;")
+	query.WriteString("ON DUPLICATE KEY UPDATE host_alias=new.host_alias;")
 
 	var args []any
 	for _, row := range pathToHost {
-		args = append(args, row.path, row.host_alias)
+		args = append(args, row.path, row.hostAlias)
 	}
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
@@ -67,7 +67,7 @@ func (store *PathStore) findAll(ctx context.Context) ([]pathToHost, error) {
 		err := rows.Scan(
 			&pathToHost.id,
 			&pathToHost.path,
-			&pathToHost.host_alias,
+			&pathToHost.hostAlias,
 			&pathToHost.isActive,
 			&pathToHost.createdAt,
 			&pathToHost.updatedAt,

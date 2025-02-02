@@ -20,7 +20,7 @@ func (request registerhostRequest) valid(ctx context.Context) map[string]string 
 			problems[key] = err.Error()
 		}
 
-		err = validateAlias(alias)
+		err = ValidateAlias(alias)
 		if err != nil {
 			problems[key] = err.Error()
 		}
@@ -51,7 +51,7 @@ func validateAuthority(authority string) error {
 	return nil
 }
 
-func validateAlias(alias string) error {
+func ValidateAlias(alias string) error {
 	if alias == "" {
 		return errors.New("Invalid alias: empty")
 	}
