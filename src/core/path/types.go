@@ -3,12 +3,12 @@ package path
 import "time"
 
 type pathToHost struct {
-	id        int
-	path      string
-	host      string
-	isActive  bool
-	createdAt time.Time
-	updatedAt time.Time
+	id         int
+	path       string
+	host_alias string
+	isActive   bool
+	createdAt  time.Time
+	updatedAt  time.Time
 }
 
 type pathToHostUpsertMany struct {

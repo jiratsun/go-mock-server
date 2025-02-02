@@ -67,7 +67,7 @@ func (store *PathStore) findAll(ctx context.Context) ([]pathToHost, error) {
 		err := rows.Scan(
 			&pathToHost.id,
 			&pathToHost.path,
-			&pathToHost.host,
+			&pathToHost.host_alias,
 			&pathToHost.isActive,
 			&pathToHost.createdAt,
 			&pathToHost.updatedAt,
