@@ -24,7 +24,7 @@ func (store *PathStore) upsertMany(ctx context.Context, pathToHost []pathToHostU
 
 	var args []any
 	for _, row := range pathToHost {
-		args = append(args, row.path, row.host)
+		args = append(args, row.path, row.host_alias)
 	}
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
