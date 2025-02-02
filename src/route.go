@@ -11,13 +11,13 @@ func route(
 	router chi.Router,
 	pathHandler *path.PathHandler,
 ) http.Handler {
-	configRouter := chi.NewRouter()
-	configRouter.Route("/path", func(r chi.Router) {
+	pathRouter := chi.NewRouter()
+	pathRouter.Route("/path", func(r chi.Router) {
 		r.Delete("/", pathHandler.HandleDelete)
 		r.Get("/", pathHandler.HandleGet)
 		r.Post("/", pathHandler.HandleRegisterPathToHost)
 	})
 
-	router.Mount("/v1/config", configRouter)
+	router.Mount("/v1", pathRouter)
 	return router
 }
