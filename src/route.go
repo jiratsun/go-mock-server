@@ -4,20 +4,26 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"mockserver.jiratviriyataranon.io/src/core/host"
 	"mockserver.jiratviriyataranon.io/src/core/path"
 )
 
 func route(
 	router chi.Router,
+	hostHandler *host.HostHandler,
 	pathHandler *path.PathHandler,
 ) http.Handler {
-	pathRouter := chi.NewRouter()
-	pathRouter.Route("/path", func(r chi.Router) {
-		r.Delete("/", pathHandler.HandleDelete)
-		r.Get("/", pathHandler.HandleGet)
-		r.Post("/", pathHandler.HandleRegisterPathToHost)
-	})
+	hostRouter := chi.NewRouter()
+	hostRouter.Post("/", hostHandler.HandleRegisterHost)
 
-	router.Mount("/v1", pathRouter)
+	pathRouter := chi.NewRouter()
+	pathRouter.Delete("/", pathHandler.HandleDelete)
+	pathRouter.Get("/", pathHandler.HandleGet)
+	pathRouter.Post("/", pathHandler.HandleRegisterPathToHost)
+
+	router.Route("/v1", func(r chi.Router) {
+		r.Mount("/host", hostRouter)
+		r.Mount("/path", pathRouter)
+	})
 	return router
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"mockserver.jiratviriyataranon.io/src/config"
+	"mockserver.jiratviriyataranon.io/src/core/host"
 	"mockserver.jiratviriyataranon.io/src/core/path"
 	"mockserver.jiratviriyataranon.io/src/initialize"
 )
@@ -85,12 +86,15 @@ func initializeHandler(ctx context.Context, getEnv func(string) string) (http.Ha
 		return nil, fmt.Errorf("Error setting up SQL: %w", err)
 	}
 
+	hostStore := &host.HostStore{SqlPool: sqlPool, GetEnv: getEnv}
 	pathStore := &path.PathStore{SqlPool: sqlPool, GetEnv: getEnv}
 
+	hostHandler := &host.HostHandler{Store: hostStore}
 	pathHandler := &path.PathHandler{Store: pathStore}
 
 	return route(
 		chi.NewRouter(),
+		hostHandler,
 		pathHandler,
 	), nil
 }
