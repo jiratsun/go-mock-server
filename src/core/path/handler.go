@@ -24,7 +24,7 @@ func (handler *PathHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 
 	response := make(getPathResponse)
 	for _, pathToHost := range result {
-		response[pathToHost.path] = getPathInfo{Host: pathToHost.host_alias, IsActive: pathToHost.isActive}
+		response[pathToHost.path] = pathInfo{Host: pathToHost.host_alias, IsActive: pathToHost.isActive}
 	}
 
 	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))

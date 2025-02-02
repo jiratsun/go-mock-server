@@ -18,9 +18,9 @@ type pathToHostUpsertMany struct {
 
 type registerPathRequest map[string]string
 
-type getPathResponse map[string]getPathInfo
+type getPathResponse map[string]pathInfo
 
-type getPathInfo struct {
+type pathInfo struct {
 	Host     string
 	IsActive bool
 }
