@@ -23,14 +23,16 @@ func (handler *HostHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	for _, hostWithPath := range result {
 		aliasInfo, exist := response[hostWithPath.alias]
 		if !exist {
-			aliasInfo = &hostInfo{Host: hostWithPath.host, IsActive: hostWithPath.isActive}
+			aliasInfo = &hostInfo{Host: hostWithPath.host, IsActive: hostWithPath.isActive, Paths: []pathInfo{}}
 			response[hostWithPath.alias] = aliasInfo
 		}
 
-		aliasInfo.Paths = append(
-			aliasInfo.Paths,
-			pathInfo{Path: hostWithPath.path_path, IsActive: hostWithPath.path_isActive},
-		)
+		if hostWithPath.path.Valid && hostWithPath.pathIsActive.Valid {
+			aliasInfo.Paths = append(
+				aliasInfo.Paths,
+				pathInfo{Path: hostWithPath.path.String, IsActive: hostWithPath.pathIsActive.Bool},
+			)
+		}
 	}
 
 	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))

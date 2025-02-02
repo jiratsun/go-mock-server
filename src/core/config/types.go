@@ -1,6 +1,7 @@
 package config
 
 import (
+	"database/sql"
 	"time"
 
 	"mockserver.jiratviriyataranon.io/src/data"
@@ -8,18 +9,18 @@ import (
 
 // DB Schema
 type hostWithPath struct {
-	id             int
-	host           string
-	alias          string
-	isActive       bool
-	createdAt      time.Time
-	updatedAt      time.Time
-	path_id        int
-	path_path      string
-	path_hostAlias string
-	path_isActive  bool
-	path_createdAt time.Time
-	path_updatedAt time.Time
+	id            int
+	host          string
+	alias         string
+	isActive      bool
+	createdAt     time.Time
+	updatedAt     time.Time
+	pathId        sql.NullInt64
+	path          sql.NullString
+	hostAlias     sql.NullString
+	pathIsActive  sql.NullBool
+	pathCreatedAt sql.NullTime
+	pathUpdatedAt sql.NullTime
 }
 
 type pathToHost struct {

@@ -18,7 +18,8 @@ type ConfigStore struct {
 func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, error) {
 	var query strings.StringBuilder
 	query.WriteStringln("SELECT * FROM host")
-	query.WriteString("JOIN path_to_host ON host.alias = path_to_host.host_alias")
+	query.WriteStringln("LEFT JOIN path_to_host")
+	query.WriteString("ON host.alias = path_to_host.host_alias")
 	result := make([]hostWithPath, 0)
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
@@ -45,12 +46,12 @@ func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, 
 			&hostWithPath.isActive,
 			&hostWithPath.createdAt,
 			&hostWithPath.updatedAt,
-			&hostWithPath.path_id,
-			&hostWithPath.path_path,
-			&hostWithPath.path_hostAlias,
-			&hostWithPath.path_isActive,
-			&hostWithPath.path_createdAt,
-			&hostWithPath.path_updatedAt,
+			&hostWithPath.pathId,
+			&hostWithPath.path,
+			&hostWithPath.hostAlias,
+			&hostWithPath.pathIsActive,
+			&hostWithPath.pathCreatedAt,
+			&hostWithPath.pathUpdatedAt,
 		)
 		if err != nil {
 			return result, fmt.Errorf("Error parsing rows: %w", err)
