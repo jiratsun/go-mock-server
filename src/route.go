@@ -23,8 +23,8 @@ func route(
 	pathRouter.Post("/", pathHandler.HandleRegisterPathToHost)
 
 	router.Route("/v1", func(r chi.Router) {
-		r.Mount("/host", hostRouter)
-		r.Mount("/path", pathRouter)
+		r.Mount("/config/host", hostRouter)
+		r.Mount("/config/path", pathRouter)
 	})
 	return router
 }
