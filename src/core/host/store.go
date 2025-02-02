@@ -15,6 +15,45 @@ type HostStore struct {
 	GetEnv  func(string) string
 }
 
+func (store *HostStore) findAll(ctx context.Context) ([]host, error) {
+	query := "SELECT * FROM host"
+	result := make([]host, 0)
+
+	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
+	if err != nil {
+		return result, fmt.Errorf("Error parsing SQL_READ_TIMEOUT: %w", err)
+	}
+
+	queryCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	rows, err := store.SqlPool.QueryContext(queryCtx, query)
+	if err != nil {
+		return result, fmt.Errorf("Error reading from database: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var aliasToHost host
+
+		err := rows.Scan(
+			&aliasToHost.id,
+			&aliasToHost.host,
+			&aliasToHost.alias,
+			&aliasToHost.isActive,
+			&aliasToHost.createdAt,
+			&aliasToHost.updatedAt,
+		)
+		if err != nil {
+			return result, fmt.Errorf("Error parsing rows: %w", err)
+		}
+
+		result = append(result, aliasToHost)
+	}
+
+	return result, nil
+}
+
 func (store *HostStore) upsertMany(ctx context.Context, aliasToHost []aliasToHostUpsertMany) error {
 	var query strings.StringBuilder
 	query.WriteStringln("INSERT INTO host (alias, host) VALUES")

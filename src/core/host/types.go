@@ -17,3 +17,10 @@ type aliasToHostUpsertMany struct {
 }
 
 type registerhostRequest map[string]string
+
+type getHostResponse map[string]hostInfo
+
+type hostInfo struct {
+	Host     string
+	IsActive bool
+}

@@ -12,6 +12,21 @@ type HostHandler struct {
 	getEnv func(string) string
 }
 
+func (handler *HostHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
+	result, err := handler.Store.findAll(r.Context())
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	response := make(getHostResponse)
+	for _, aliasToHost := range result {
+		response[aliasToHost.alias] = hostInfo{Host: aliasToHost.host, IsActive: aliasToHost.isActive}
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))
+}
+
 func (handler *HostHandler) HandleRegisterHost(w http.ResponseWriter, r *http.Request) {
 	request, err := data.Decode[registerhostRequest](r)
 	if err != nil {

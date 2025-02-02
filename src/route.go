@@ -14,6 +14,7 @@ func route(
 	pathHandler *path.PathHandler,
 ) http.Handler {
 	hostRouter := chi.NewRouter()
+	hostRouter.Get("/", hostHandler.HandleGet)
 	hostRouter.Post("/", hostHandler.HandleRegisterHost)
 
 	pathRouter := chi.NewRouter()
