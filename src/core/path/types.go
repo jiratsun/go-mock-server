@@ -21,11 +21,3 @@ type pathToHostUpsertMany struct {
 }
 
 type registerPathRequest map[string]data.StringOrSlice
-
-type getPathResponse map[string]pathInfo
-
-type pathInfo struct {
-	Host     string
-	IsActive bool
-}
-

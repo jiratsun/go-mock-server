@@ -19,7 +19,6 @@ func route(
 
 	pathRouter := chi.NewRouter()
 	pathRouter.Delete("/", pathHandler.HandleDelete)
-	pathRouter.Get("/", pathHandler.HandleGet)
 	pathRouter.Post("/", pathHandler.HandleRegisterPathToHost)
 
 	router.Route("/v1", func(r chi.Router) {

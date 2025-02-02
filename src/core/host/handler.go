@@ -13,15 +13,24 @@ type HostHandler struct {
 }
 
 func (handler *HostHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
-	result, err := handler.Store.findAll(r.Context())
+	result, err := handler.Store.findAllWithPath(r.Context())
 	if err != nil {
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
 		return
 	}
 
 	response := make(getHostResponse)
-	for _, aliasToHost := range result {
-		response[aliasToHost.alias] = hostInfo{Host: aliasToHost.host, IsActive: aliasToHost.isActive}
+	for _, hostWithPath := range result {
+		aliasInfo, exist := response[hostWithPath.alias]
+		if !exist {
+			aliasInfo = &hostInfo{Host: hostWithPath.host, IsActive: hostWithPath.isActive}
+			response[hostWithPath.alias] = aliasInfo
+		}
+
+		aliasInfo.Paths = append(
+			aliasInfo.Paths,
+			pathInfo{Path: hostWithPath.path_path, IsActive: hostWithPath.path_isActive},
+		)
 	}
 
 	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))

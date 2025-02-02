@@ -15,9 +15,11 @@ type HostStore struct {
 	GetEnv  func(string) string
 }
 
-func (store *HostStore) findAll(ctx context.Context) ([]host, error) {
-	query := "SELECT * FROM host"
-	result := make([]host, 0)
+func (store *HostStore) findAllWithPath(ctx context.Context) ([]hostWithPath, error) {
+	var query strings.StringBuilder
+	query.WriteStringln("SELECT * FROM host")
+	query.WriteString("JOIN path_to_host ON host.alias = path_to_host.host_alias")
+	result := make([]hostWithPath, 0)
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
 	if err != nil {
@@ -27,28 +29,34 @@ func (store *HostStore) findAll(ctx context.Context) ([]host, error) {
 	queryCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	rows, err := store.SqlPool.QueryContext(queryCtx, query)
+	rows, err := store.SqlPool.QueryContext(queryCtx, query.String())
 	if err != nil {
 		return result, fmt.Errorf("Error reading from database: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var aliasToHost host
+		var hostWithPath hostWithPath
 
 		err := rows.Scan(
-			&aliasToHost.id,
-			&aliasToHost.host,
-			&aliasToHost.alias,
-			&aliasToHost.isActive,
-			&aliasToHost.createdAt,
-			&aliasToHost.updatedAt,
+			&hostWithPath.id,
+			&hostWithPath.host,
+			&hostWithPath.alias,
+			&hostWithPath.isActive,
+			&hostWithPath.createdAt,
+			&hostWithPath.updatedAt,
+			&hostWithPath.path_id,
+			&hostWithPath.path_path,
+			&hostWithPath.path_hostAlias,
+			&hostWithPath.path_isActive,
+			&hostWithPath.path_createdAt,
+			&hostWithPath.path_updatedAt,
 		)
 		if err != nil {
 			return result, fmt.Errorf("Error parsing rows: %w", err)
 		}
 
-		result = append(result, aliasToHost)
+		result = append(result, hostWithPath)
 	}
 
 	return result, nil
