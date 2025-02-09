@@ -54,7 +54,7 @@ func (handler *HostHandler) HandleRegisterHost(w http.ResponseWriter, r *http.Re
 
 	var dto []aliasToHostUpsertMany
 	for k, v := range request {
-		dto = append(dto, aliasToHostUpsertMany{alias: k, host: v})
+		dto = append(dto, aliasToHostUpsertMany{Alias: k, Host: v})
 	}
 
 	err = handler.Store.upsertMany(r.Context(), dto)

@@ -34,13 +34,13 @@ type pathToHost struct {
 
 // DTO
 type aliasToHostUpsertMany struct {
-	alias string
-	host  string
+	Alias string
+	Host  string
 }
 
 type pathToHostUpsertMany struct {
-	path      string
-	hostAlias string
+	Path      string
+	HostAlias string
 }
 
 // Request

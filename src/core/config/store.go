@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	i "mockserver.jiratviriyataranon.io/src/integers"
-	"mockserver.jiratviriyataranon.io/src/strings"
+	"github.com/go-jet/jet/v2/mysql"
+	. "mockserver.jiratviriyataranon.io/.jet-gen/go_mock_server/table"
 )
 
 type ConfigStore struct {
@@ -16,11 +16,12 @@ type ConfigStore struct {
 }
 
 func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, error) {
-	var query strings.StringBuilder
-	query.WriteStringln("SELECT * FROM host")
-	query.WriteStringln("LEFT JOIN path_to_host")
-	query.WriteString("ON host.alias = path_to_host.host_alias")
 	result := make([]hostWithPath, 0)
+	statement := mysql.
+		SELECT(Host.AllColumns, PathToHost.AllColumns).
+		FROM(Host.
+			LEFT_JOIN(PathToHost, Host.Alias_.EQ(PathToHost.HostAlias)),
+		)
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
 	if err != nil {
@@ -30,7 +31,7 @@ func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, 
 	queryCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	rows, err := store.SqlPool.QueryContext(queryCtx, query.String())
+	rows, err := statement.Rows(queryCtx, store.SqlPool)
 	if err != nil {
 		return result, fmt.Errorf("Error reading from database: %w", err)
 	}
@@ -39,7 +40,7 @@ func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, 
 	for rows.Next() {
 		var hostWithPath hostWithPath
 
-		err := rows.Scan(
+		err := rows.Rows.Scan(
 			&hostWithPath.id,
 			&hostWithPath.host,
 			&hostWithPath.alias,
@@ -64,16 +65,11 @@ func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, 
 }
 
 func (store *ConfigStore) upsertMany(ctx context.Context, aliasToHost []aliasToHostUpsertMany) error {
-	var query strings.StringBuilder
-	query.WriteStringln("INSERT INTO host (alias, host) VALUES")
-	query.WriteStringlnRepeat("(?, ?),", i.Dec(len(aliasToHost)))
-	query.WriteStringln("(?, ?) AS new")
-	query.WriteString("ON DUPLICATE KEY UPDATE host=new.host;")
-
-	var args []any
-	for _, row := range aliasToHost {
-		args = append(args, row.alias, row.host)
-	}
+	statement := Host.
+		INSERT(Host.Alias_, Host.Host).
+		MODELS(aliasToHost).
+		AS_NEW().
+		ON_DUPLICATE_KEY_UPDATE(Host.Host.SET(Host.NEW.Host))
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
 	if err != nil {
@@ -83,7 +79,7 @@ func (store *ConfigStore) upsertMany(ctx context.Context, aliasToHost []aliasToH
 	queryCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err = store.SqlPool.QueryRowContext(queryCtx, query.String(), args...).Err()
+	_, err = statement.ExecContext(queryCtx, store.SqlPool)
 	if err != nil {
 		return fmt.Errorf("Error writing to database: %w", err)
 	}
@@ -92,16 +88,11 @@ func (store *ConfigStore) upsertMany(ctx context.Context, aliasToHost []aliasToH
 }
 
 func (store *ConfigStore) upsertManyPath(ctx context.Context, pathToHost []pathToHostUpsertMany) error {
-	var query strings.StringBuilder
-	query.WriteStringln("INSERT INTO path_to_host (path, host_alias) VALUES")
-	query.WriteStringlnRepeat("(?, ?),", i.Dec(len(pathToHost)))
-	query.WriteStringln("(?, ?) AS new")
-	query.WriteString("ON DUPLICATE KEY UPDATE host_alias=new.host_alias;")
-
-	var args []any
-	for _, row := range pathToHost {
-		args = append(args, row.path, row.hostAlias)
-	}
+	statement := PathToHost.
+		INSERT(PathToHost.Path, PathToHost.HostAlias).
+		MODELS(pathToHost).
+		AS_NEW().
+		ON_DUPLICATE_KEY_UPDATE(PathToHost.HostAlias.SET(PathToHost.NEW.HostAlias))
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
 	if err != nil {
@@ -111,7 +102,7 @@ func (store *ConfigStore) upsertManyPath(ctx context.Context, pathToHost []pathT
 	queryCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err = store.SqlPool.QueryRowContext(queryCtx, query.String(), args...).Err()
+	_, err = statement.ExecContext(queryCtx, store.SqlPool)
 	if err != nil {
 		return fmt.Errorf("Error writing to database: %w", err)
 	}
