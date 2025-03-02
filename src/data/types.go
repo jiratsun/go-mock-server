@@ -6,9 +6,9 @@ import (
 )
 
 type GeneralResponse[T any] struct {
-	Status         string
-	AdditionalInfo any
-	Data           T
+	Status         string `json:"status,omitempty"`
+	AdditionalInfo any    `json:"additionalInfo,omitempty"`
+	Data           T      `json:"data,omitempty"`
 }
 
 type StringOrSlice []string
