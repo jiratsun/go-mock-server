@@ -3,8 +3,6 @@ package config
 import (
 	"database/sql"
 	"time"
-
-	"mockserver.jiratviriyataranon.io/src/data"
 )
 
 // DB Schema
@@ -23,7 +21,7 @@ type hostWithPath struct {
 	pathUpdatedAt sql.NullTime
 }
 
-type pathToHost struct {
+type path struct {
 	id        int
 	path      string
 	hostAlias string
@@ -38,15 +36,22 @@ type aliasToHostUpsertMany struct {
 	Host  string
 }
 
-type pathToHostUpsertMany struct {
-	Path      string
-	HostAlias string
+type pathUpsertMany struct {
+	Path        string
+	DefaultHost sql.NullString
+	Description string
 }
 
 // Request
 type registerhostRequest map[string]string
 
-type registerPathRequest map[string]data.StringOrSlice
+type registerPathRequest struct {
+	Paths []struct {
+		Path        string
+		DefaultHost string
+		Description string
+	}
+}
 
 // Response
 type getHostResponse map[string]*hostInfo

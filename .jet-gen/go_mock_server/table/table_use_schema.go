@@ -11,5 +11,5 @@ package table
 // this method only once at the beginning of the program.
 func UseSchema(schema string) {
 	Host = Host.FromSchema(schema)
-	PathToHost = PathToHost.FromSchema(schema)
+	Path = Path.FromSchema(schema)
 }

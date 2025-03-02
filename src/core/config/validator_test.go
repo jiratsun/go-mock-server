@@ -133,6 +133,11 @@ func TestValidatePath(t *testing.T) {
 			valid,
 		},
 		{
+			"Valid empty path",
+			"",
+			valid,
+		},
+		{
 			"Valid path with hyphen",
 			"/valid-path/",
 			valid,

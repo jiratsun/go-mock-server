@@ -18,7 +18,7 @@ func route(
 	})
 
 	pathRouter := chi.NewRouter().Group(func(r chi.Router) {
-		r.Post("/", pathHandler.HandleRegisterPathToHost)
+		r.Post("/", pathHandler.HandleRegisterPath)
 	})
 
 	router.Route("/v1", func(r chi.Router) {

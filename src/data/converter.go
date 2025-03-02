@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -29,4 +30,12 @@ func Encode[T any](w http.ResponseWriter, status int, v T) error {
 	}
 
 	return nil
+}
+
+func ToNullString(s string) sql.NullString {
+	if len(s) == 0 {
+		return sql.NullString{}
+	}
+
+	return sql.NullString{String: s, Valid: true}
 }

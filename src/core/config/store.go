@@ -87,12 +87,15 @@ func (store *ConfigStore) upsertMany(ctx context.Context, aliasToHost []aliasToH
 	return nil
 }
 
-func (store *ConfigStore) upsertManyPath(ctx context.Context, pathToHost []pathToHostUpsertMany) error {
-	statement := PathToHost.
-		INSERT(PathToHost.Path, PathToHost.HostAlias).
-		MODELS(pathToHost).
+func (store *ConfigStore) upsertManyPath(ctx context.Context, paths []pathUpsertMany) error {
+	statement := Path.
+		INSERT(Path.Path, Path.DefaultHost, Path.Description).
+		MODELS(paths).
 		AS_NEW().
-		ON_DUPLICATE_KEY_UPDATE(PathToHost.HostAlias.SET(PathToHost.NEW.HostAlias))
+		ON_DUPLICATE_KEY_UPDATE(
+			Path.DefaultHost.SET(Path.NEW.DefaultHost),
+			Path.Description.SET(Path.NEW.Description),
+		)
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
 	if err != nil {

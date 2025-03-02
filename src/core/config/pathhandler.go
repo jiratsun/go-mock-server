@@ -12,7 +12,7 @@ type PathHandler struct {
 	getEnv func(string) string
 }
 
-func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *http.Request) {
+func (handler *PathHandler) HandleRegisterPath(w http.ResponseWriter, r *http.Request) {
 	request, err := data.Decode[registerPathRequest](r)
 	if err != nil {
 		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
@@ -26,11 +26,13 @@ func (handler *PathHandler) HandleRegisterPathToHost(w http.ResponseWriter, r *h
 		return
 	}
 
-	var dto []pathToHostUpsertMany
-	for hostAlias, paths := range request {
-		for _, path := range paths {
-			dto = append(dto, pathToHostUpsertMany{Path: path, HostAlias: hostAlias})
-		}
+	var dto []pathUpsertMany
+	for _, path := range request.Paths {
+		dto = append(dto, pathUpsertMany{
+			Path:        path.Path,
+			DefaultHost: data.ToNullString(path.DefaultHost),
+			Description: path.Description,
+		})
 	}
 
 	err = handler.Store.upsertManyPath(r.Context(), dto)

@@ -32,19 +32,34 @@ func (request registerhostRequest) valid(ctx context.Context) map[string]string 
 
 func (request registerPathRequest) valid(ctx context.Context) map[string]string {
 	problems := make(map[string]string)
+	paths := request.Paths
 
-	for hostAlias, paths := range request {
-		err := validateAlias(hostAlias)
+	if paths == nil {
+		problems["paths"] = "Missing paths variable"
+	}
+
+	if len(paths) == 0 {
+		problems["paths"] = "Empty paths variable"
+	}
+
+	for _, path := range paths {
+		err := validatePath(path.Path)
 		if err != nil {
-			problems[hostAlias] = err.Error()
+			key := fmt.Sprintf("path: %v", path.Path)
+			problems[key] = err.Error()
 		}
 
-		for _, path := range paths {
-			err = validatePath(path)
+		if path.DefaultHost != "" {
+			err = validateAuthority(path.DefaultHost)
 			if err != nil {
-				key := fmt.Sprintf("%v: %v", hostAlias, path)
+				key := fmt.Sprintf("defaultHost: %v", path.DefaultHost)
 				problems[key] = err.Error()
 			}
+		}
+
+		if len(path.Description) > 255 {
+			key := fmt.Sprintf("description: %v", path.Description)
+			problems[key] = "Invalid description: length should not exceed 255"
 		}
 	}
 
@@ -52,6 +67,14 @@ func (request registerPathRequest) valid(ctx context.Context) map[string]string 
 }
 
 func validateAuthority(authority string) error {
+	if authority == "" {
+		return errors.New("Invalid authority: empty")
+	}
+
+	if len(authority) > 255 {
+		return errors.New("Invalid authority: length should not exceed 255")
+	}
+
 	parsedAuthority, err := url.Parse(authority)
 	if err != nil {
 		return fmt.Errorf("Invalid authority: %w", err)
@@ -89,6 +112,10 @@ func validateAlias(alias string) error {
 func validatePath(path string) error {
 	if path != "" && !strings.HasPrefix(path, "/") {
 		return errors.New("Invalid path: should be empty or begins with /")
+	}
+
+	if len(path) > 255 {
+		return errors.New("Invalid path: length should not exceed 255")
 	}
 
 	charValidator := regexp.MustCompile(`^(/[\w\-./]*)?$`)

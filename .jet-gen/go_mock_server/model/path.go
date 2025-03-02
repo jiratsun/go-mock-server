@@ -11,11 +11,12 @@ import (
 	"time"
 )
 
-type PathToHost struct {
-	ID        int32 `sql:"primary_key"`
-	Path      string
-	HostAlias string
-	IsActive  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type Path struct {
+	ID          int32 `sql:"primary_key"`
+	Path        string
+	DefaultHost *string
+	Description *string
+	IsActive    bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
