@@ -46,13 +46,43 @@ func (handler *PathHandler) HandleRegisterPath(w http.ResponseWriter, r *http.Re
 	var dto []pathUpsertMany
 	for _, path := range request.Paths {
 		dto = append(dto, pathUpsertMany{
-			Path:        path.Path,
+			Path:        *path.Path,
 			DefaultHost: data.ToNullString(path.DefaultHost),
 			Description: path.Description,
 		})
 	}
 
 	err = handler.Store.upsertManyPath(r.Context(), dto)
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse[any](nil, nil))
+}
+
+func (handler *PathHandler) HandleDeletePath(w http.ResponseWriter, r *http.Request) {
+	request, err := data.Decode[deletePathRequest](r)
+	if err != nil {
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	problems := request.valid(r.Context())
+	if len(problems) > 0 {
+		err = errors.New("Invalid request body")
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, problems, nil))
+		return
+	}
+
+	var paths []string
+	for _, path := range request.Paths {
+		if path.Path != nil {
+			paths = append(paths, *path.Path)
+		}
+	}
+
+	err = handler.Store.deleteManyPath(r.Context(), pathDeleteMany{Path: paths})
 	if err != nil {
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
 		return

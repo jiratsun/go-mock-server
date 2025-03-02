@@ -146,3 +146,31 @@ func (store *ConfigStore) upsertManyPath(ctx context.Context, paths []pathUpsert
 
 	return nil
 }
+
+func (store *ConfigStore) deleteManyPath(ctx context.Context, paths pathDeleteMany) error {
+	whereClause := mysql.Bool(false)
+
+	if len(paths.Path) > 0 {
+		domainName := data.Map(paths.Path, func(v string) mysql.Expression {
+			return mysql.String(v)
+		})
+		whereClause = whereClause.OR(Path.Path.IN(domainName...))
+	}
+
+	statement := Path.DELETE().WHERE(whereClause)
+
+	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
+	if err != nil {
+		return fmt.Errorf("Error parsing SQL_WRITE_TIMEOUT: %w", err)
+	}
+
+	queryCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	_, err = statement.ExecContext(queryCtx, store.SqlPool)
+	if err != nil {
+		return fmt.Errorf("Error writing to database: %w", err)
+	}
+
+	return nil
+}

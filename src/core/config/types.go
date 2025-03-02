@@ -25,6 +25,10 @@ type pathUpsertMany struct {
 	Description string
 }
 
+type pathDeleteMany struct {
+	Path []string
+}
+
 // Request
 type registerHostRequest struct {
 	Hosts []struct {
@@ -43,9 +47,15 @@ type deleteHostRequest struct {
 
 type registerPathRequest struct {
 	Paths []struct {
-		Path        string
+		Path        *string
 		DefaultHost *string
 		Description string
+	}
+}
+
+type deletePathRequest struct {
+	Paths []struct {
+		Path *string
 	}
 }
 

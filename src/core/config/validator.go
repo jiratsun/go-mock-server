@@ -90,14 +90,18 @@ func (request registerPathRequest) valid(ctx context.Context) map[string]string 
 	}
 
 	for _, path := range paths {
-		err := validatePath(path.Path)
-		if err != nil {
-			key := fmt.Sprintf("path: %v", path.Path)
-			problems[key] = err.Error()
+		if path.Path == nil {
+			problems["path"] = "Missing path variable"
+		} else {
+			err := validatePath(*path.Path)
+			if err != nil {
+				key := fmt.Sprintf("path: %v", path.Path)
+				problems[key] = err.Error()
+			}
 		}
 
 		if path.DefaultHost != nil {
-			err = validateAuthority(*path.DefaultHost)
+			err := validateAuthority(*path.DefaultHost)
 			if err != nil {
 				key := fmt.Sprintf("defaultHost: %v", path.DefaultHost)
 				problems[key] = err.Error()
@@ -107,6 +111,31 @@ func (request registerPathRequest) valid(ctx context.Context) map[string]string 
 		if len(path.Description) > 255 {
 			key := fmt.Sprintf("description: %v", path.Description)
 			problems[key] = "Invalid description: length should not exceed 255"
+		}
+	}
+
+	return problems
+}
+
+func (request deletePathRequest) valid(ctx context.Context) map[string]string {
+	problems := make(map[string]string)
+	paths := request.Paths
+
+	if paths == nil {
+		problems["paths"] = "Missing paths variable"
+	}
+
+	if len(paths) == 0 {
+		problems["paths"] = "Empty paths variable"
+	}
+
+	for _, path := range paths {
+		if path.Path != nil {
+			err := validatePath(*path.Path)
+			if err != nil {
+				key := fmt.Sprintf("path: %v", path.Path)
+				problems[key] = err.Error()
+			}
 		}
 	}
 
