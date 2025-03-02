@@ -12,26 +12,17 @@ type HostHandler struct {
 	getEnv func(string) string
 }
 
-func (handler *HostHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
-	result, err := handler.Store.findAllWithPath(r.Context())
+func (handler *HostHandler) HandleGetHost(w http.ResponseWriter, r *http.Request) {
+	result, err := handler.Store.findAllHost(r.Context())
 	if err != nil {
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
 		return
 	}
 
 	response := make(getHostResponse)
-	for _, hostWithPath := range result {
-		aliasInfo, exist := response[hostWithPath.alias]
-		if !exist {
-			aliasInfo = &hostInfo{Host: hostWithPath.host, IsActive: hostWithPath.isActive, Paths: []pathInfo{}}
-			response[hostWithPath.alias] = aliasInfo
-		}
-
-		if hostWithPath.path.Valid && hostWithPath.pathIsActive.Valid {
-			aliasInfo.Paths = append(
-				aliasInfo.Paths,
-				pathInfo{Path: hostWithPath.path.String, IsActive: hostWithPath.pathIsActive.Bool},
-			)
+	for _, host := range result {
+		response[host.DomainName] = &hostInfo{
+			Alias: host.Alias, Description: host.Description, IsActive: host.IsActive,
 		}
 	}
 

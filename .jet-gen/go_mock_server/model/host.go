@@ -15,7 +15,7 @@ type Host struct {
 	ID          int32 `sql:"primary_key"`
 	DomainName  string
 	Alias       string
-	Description *string
+	Description string
 	IsActive    bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

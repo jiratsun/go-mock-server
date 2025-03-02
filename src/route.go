@@ -13,7 +13,7 @@ func route(
 	pathHandler *config.PathHandler,
 ) http.Handler {
 	hostRouter := chi.NewRouter().Group(func(r chi.Router) {
-		r.Get("/", hostHandler.HandleGet)
+		r.Get("/", hostHandler.HandleGetHost)
 		r.Post("/", hostHandler.HandleRegisterHost)
 	})
 
