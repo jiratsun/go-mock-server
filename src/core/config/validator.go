@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (request registerhostRequest) valid(ctx context.Context) map[string]string {
+func (request registerHostRequest) valid(ctx context.Context) map[string]string {
 	problems := make(map[string]string)
 	hosts := request.Hosts
 

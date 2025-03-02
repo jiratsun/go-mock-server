@@ -18,7 +18,7 @@ type pathUpsertMany struct {
 }
 
 // Request
-type registerhostRequest struct {
+type registerHostRequest struct {
 	Hosts []struct {
 		DomainName  string
 		Alias       string

@@ -30,7 +30,7 @@ func (handler *HostHandler) HandleGetHost(w http.ResponseWriter, r *http.Request
 }
 
 func (handler *HostHandler) HandleRegisterHost(w http.ResponseWriter, r *http.Request) {
-	request, err := data.Decode[registerhostRequest](r)
+	request, err := data.Decode[registerHostRequest](r)
 	if err != nil {
 		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
 		return
