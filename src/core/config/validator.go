@@ -44,6 +44,39 @@ func (request registerHostRequest) valid(ctx context.Context) map[string]string 
 	return problems
 }
 
+func (request deleteHostRequest) valid(ctx context.Context) map[string]string {
+	problems := make(map[string]string)
+	hosts := request.Hosts
+
+	if hosts == nil {
+		problems["hosts"] = "Missing hosts variable"
+	}
+
+	if len(hosts) == 0 {
+		problems["hosts"] = "Empty hosts variable"
+	}
+
+	for _, host := range hosts {
+		if host.DomainName != nil {
+			err := validateAuthority(*host.DomainName)
+			if err != nil {
+				key := fmt.Sprintf("domainName: %v", host.DomainName)
+				problems[key] = err.Error()
+			}
+		}
+
+		if host.Alias != nil {
+			err := validateAlias(*host.Alias)
+			if err != nil {
+				key := fmt.Sprintf("alias: %v", host.Alias)
+				problems[key] = err.Error()
+			}
+		}
+	}
+
+	return problems
+}
+
 func (request registerPathRequest) valid(ctx context.Context) map[string]string {
 	problems := make(map[string]string)
 	paths := request.Paths

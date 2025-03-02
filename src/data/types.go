@@ -11,6 +11,15 @@ type GeneralResponse[T any] struct {
 	Data           T      `json:"data,omitempty"`
 }
 
+type Tuple2[L, R any] struct {
+	Left  L
+	Right R
+}
+
+func Pair[L, R any](left L, right R) Tuple2[L, R] {
+	return Tuple2[L, R]{left, right}
+}
+
 type StringOrSlice []string
 
 func (s *StringOrSlice) UnmarshalJSON(jsonValue []byte) error {

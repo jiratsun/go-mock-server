@@ -15,6 +15,7 @@ func route(
 	hostRouter := chi.NewRouter().Group(func(r chi.Router) {
 		r.Get("/", hostHandler.HandleGetHost)
 		r.Post("/", hostHandler.HandleRegisterHost)
+		r.Delete("/", hostHandler.HandleDeleteHost)
 	})
 
 	pathRouter := chi.NewRouter().Group(func(r chi.Router) {

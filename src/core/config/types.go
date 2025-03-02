@@ -2,6 +2,8 @@ package config
 
 import (
 	"database/sql"
+
+	"mockserver.jiratviriyataranon.io/src/data"
 )
 
 // DTO
@@ -9,6 +11,12 @@ type hostUpsertMany struct {
 	DomainName  string
 	Alias       string
 	Description string
+}
+
+type hostDeleteMany struct {
+	DomainName []string
+	Alias      []string
+	Both       []data.Tuple2[string, string]
 }
 
 type pathUpsertMany struct {
@@ -23,6 +31,13 @@ type registerHostRequest struct {
 		DomainName  string
 		Alias       string
 		Description string
+	}
+}
+
+type deleteHostRequest struct {
+	Hosts []struct {
+		DomainName *string
+		Alias      *string
 	}
 }
 
