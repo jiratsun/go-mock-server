@@ -8,7 +8,7 @@ import (
 )
 
 type HostHandler struct {
-	Store  *ConfigStore
+	Store  *HostStore
 	getEnv func(string) string
 }
 

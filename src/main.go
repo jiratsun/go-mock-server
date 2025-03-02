@@ -85,10 +85,11 @@ func initializeHandler(ctx context.Context, getEnv func(string) string) (http.Ha
 		return nil, fmt.Errorf("Error setting up SQL: %w", err)
 	}
 
-	configStore := &configuration.ConfigStore{SqlPool: sqlPool, GetEnv: getEnv}
+	hostStore := &configuration.HostStore{SqlPool: sqlPool, GetEnv: getEnv}
+	pathStore := &configuration.PathStore{SqlPool: sqlPool, GetEnv: getEnv}
 
-	hostHandler := &configuration.HostHandler{Store: configStore}
-	pathHandler := &configuration.PathHandler{Store: configStore}
+	hostHandler := &configuration.HostHandler{Store: hostStore}
+	pathHandler := &configuration.PathHandler{Store: pathStore}
 
 	return route(
 		chi.NewRouter(),

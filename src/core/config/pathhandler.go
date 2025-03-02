@@ -8,7 +8,7 @@ import (
 )
 
 type PathHandler struct {
-	Store  *ConfigStore
+	Store  *PathStore
 	getEnv func(string) string
 }
 
