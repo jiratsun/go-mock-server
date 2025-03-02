@@ -32,12 +32,12 @@ func Encode[T any](w http.ResponseWriter, status int, v T) error {
 	return nil
 }
 
-func ToNullString(s string) sql.NullString {
-	if len(s) == 0 {
+func ToNullString(s *string) sql.NullString {
+	if s == nil {
 		return sql.NullString{}
 	}
 
-	return sql.NullString{String: s, Valid: true}
+	return sql.NullString{String: *s, Valid: true}
 }
 
 func ToString(s *string) string {

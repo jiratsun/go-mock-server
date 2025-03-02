@@ -63,8 +63,8 @@ func (request registerPathRequest) valid(ctx context.Context) map[string]string 
 			problems[key] = err.Error()
 		}
 
-		if path.DefaultHost != "" {
-			err = validateAuthority(path.DefaultHost)
+		if path.DefaultHost != nil {
+			err = validateAuthority(*path.DefaultHost)
 			if err != nil {
 				key := fmt.Sprintf("defaultHost: %v", path.DefaultHost)
 				problems[key] = err.Error()

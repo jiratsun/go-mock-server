@@ -29,7 +29,7 @@ type registerhostRequest struct {
 type registerPathRequest struct {
 	Paths []struct {
 		Path        string
-		DefaultHost string
+		DefaultHost *string
 		Description string
 	}
 }
