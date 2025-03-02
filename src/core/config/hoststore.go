@@ -58,7 +58,7 @@ func (store *HostStore) upsertManyHost(ctx context.Context, hosts []hostUpsertMa
 	return nil
 }
 
-func (store *HostStore) deleteManyHost(ctx context.Context, hosts hostDeleteMany) error {
+func (store *HostStore) deleteManyHost(ctx context.Context, hosts hostModifyMany) error {
 	whereClause := mysql.Bool(false)
 
 	if len(hosts.DomainName) > 0 {
@@ -84,6 +84,50 @@ func (store *HostStore) deleteManyHost(ctx context.Context, hosts hostDeleteMany
 	}
 
 	statement := Host.DELETE().WHERE(whereClause)
+
+	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
+	if err != nil {
+		return fmt.Errorf("Error parsing SQL_WRITE_TIMEOUT: %w", err)
+	}
+
+	queryCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	_, err = statement.ExecContext(queryCtx, store.SqlPool)
+	if err != nil {
+		return fmt.Errorf("Error writing to database: %w", err)
+	}
+
+	return nil
+}
+
+func (store *HostStore) toggleManyHost(ctx context.Context, hosts hostModifyMany, enable bool) error {
+	update := m.Host{IsActive: enable}
+	whereClause := mysql.Bool(false)
+
+	if len(hosts.DomainName) > 0 {
+		domainName := data.Map(hosts.DomainName, func(v string) mysql.Expression {
+			return mysql.String(v)
+		})
+		whereClause = whereClause.OR(Host.DomainName.IN(domainName...))
+	}
+
+	if len(hosts.Alias) > 0 {
+		alias := data.Map(hosts.Alias, func(v string) mysql.Expression {
+			return mysql.String(v)
+		})
+		whereClause = whereClause.OR(Host.Alias_.IN(alias...))
+	}
+
+	if len(hosts.Both) > 0 {
+		data.ForEach(hosts.Both, func(both data.Tuple2[string, string]) {
+			criteria1 := Host.DomainName.EQ(mysql.String(both.Left))
+			criteria2 := Host.Alias_.EQ(mysql.String(both.Right))
+			whereClause = whereClause.OR(criteria1.AND(criteria2))
+		})
+	}
+
+	statement := Host.UPDATE(Host.IsActive).MODEL(update).WHERE(whereClause)
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
 	if err != nil {

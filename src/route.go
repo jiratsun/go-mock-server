@@ -16,6 +16,8 @@ func route(
 		r.Get("/", hostHandler.HandleGetHost)
 		r.Post("/", hostHandler.HandleRegisterHost)
 		r.Delete("/", hostHandler.HandleDeleteHost)
+		r.Post("/enable", hostHandler.HandleEnableHost)
+		r.Post("/disable", hostHandler.HandleDisableHost)
 	})
 
 	pathRouter := chi.NewRouter().Group(func(r chi.Router) {

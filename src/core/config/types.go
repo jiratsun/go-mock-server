@@ -13,7 +13,7 @@ type hostUpsertMany struct {
 	Description string
 }
 
-type hostDeleteMany struct {
+type hostModifyMany struct {
 	DomainName []string
 	Alias      []string
 	Both       []data.Tuple2[string, string]
@@ -38,7 +38,7 @@ type registerHostRequest struct {
 	}
 }
 
-type deleteHostRequest struct {
+type modifyHostRequest struct {
 	Hosts []struct {
 		DomainName *string
 		Alias      *string

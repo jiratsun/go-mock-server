@@ -62,7 +62,7 @@ func (handler *HostHandler) HandleRegisterHost(w http.ResponseWriter, r *http.Re
 }
 
 func (handler *HostHandler) HandleDeleteHost(w http.ResponseWriter, r *http.Request) {
-	request, err := data.Decode[deleteHostRequest](r)
+	request, err := data.Decode[modifyHostRequest](r)
 	if err != nil {
 		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
 		return
@@ -89,9 +89,91 @@ func (handler *HostHandler) HandleDeleteHost(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	err = handler.Store.deleteManyHost(r.Context(), hostDeleteMany{
+	err = handler.Store.deleteManyHost(r.Context(), hostModifyMany{
 		Both: both, DomainName: domainName, Alias: alias,
 	})
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse[any](nil, nil))
+}
+
+func (handler *HostHandler) HandleEnableHost(w http.ResponseWriter, r *http.Request) {
+	request, err := data.Decode[modifyHostRequest](r)
+	if err != nil {
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	problems := request.valid(r.Context())
+	if len(problems) > 0 {
+		err = errors.New("Invalid request body")
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, problems, nil))
+		return
+	}
+
+	var both []data.Tuple2[string, string]
+	var domainName []string
+	var alias []string
+	for _, host := range request.Hosts {
+		switch {
+		case host.DomainName != nil && host.Alias != nil:
+			both = append(both, data.Pair(*host.DomainName, *host.Alias))
+		case host.DomainName != nil:
+			domainName = append(domainName, *host.DomainName)
+		case host.Alias != nil:
+			alias = append(alias, *host.Alias)
+		}
+	}
+
+	err = handler.Store.toggleManyHost(
+		r.Context(),
+		hostModifyMany{Both: both, DomainName: domainName, Alias: alias},
+		true,
+	)
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse[any](nil, nil))
+}
+
+func (handler *HostHandler) HandleDisableHost(w http.ResponseWriter, r *http.Request) {
+	request, err := data.Decode[modifyHostRequest](r)
+	if err != nil {
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	problems := request.valid(r.Context())
+	if len(problems) > 0 {
+		err = errors.New("Invalid request body")
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, problems, nil))
+		return
+	}
+
+	var both []data.Tuple2[string, string]
+	var domainName []string
+	var alias []string
+	for _, host := range request.Hosts {
+		switch {
+		case host.DomainName != nil && host.Alias != nil:
+			both = append(both, data.Pair(*host.DomainName, *host.Alias))
+		case host.DomainName != nil:
+			domainName = append(domainName, *host.DomainName)
+		case host.Alias != nil:
+			alias = append(alias, *host.Alias)
+		}
+	}
+
+	err = handler.Store.toggleManyHost(
+		r.Context(),
+		hostModifyMany{Both: both, DomainName: domainName, Alias: alias},
+		false,
+	)
 	if err != nil {
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
 		return
