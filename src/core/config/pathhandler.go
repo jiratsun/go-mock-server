@@ -12,6 +12,23 @@ type PathHandler struct {
 	getEnv func(string) string
 }
 
+func (handler *PathHandler) HandleGetPath(w http.ResponseWriter, r *http.Request) {
+	result, err := handler.Store.findAllPath(r.Context())
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	response := make(getPathResponse)
+	for _, path := range result {
+		response[path.Path] = &pathInfo{
+			DefaultHost: path.DefaultHost, Description: path.Description, IsActive: path.IsActive,
+		}
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))
+}
+
 func (handler *PathHandler) HandleRegisterPath(w http.ResponseWriter, r *http.Request) {
 	request, err := data.Decode[registerPathRequest](r)
 	if err != nil {

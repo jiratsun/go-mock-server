@@ -43,7 +43,10 @@ type hostInfo struct {
 	IsActive    bool   `json:"isActive"`
 }
 
+type getPathResponse map[string]*pathInfo
+
 type pathInfo struct {
-	Path     string
-	IsActive bool
+	DefaultHost *string
+	Description string
+	IsActive    bool
 }

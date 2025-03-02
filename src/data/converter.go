@@ -39,3 +39,11 @@ func ToNullString(s string) sql.NullString {
 
 	return sql.NullString{String: s, Valid: true}
 }
+
+func ToString(s *string) string {
+	if s == nil {
+		return ""
+	}
+
+	return *s
+}

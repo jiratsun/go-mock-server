@@ -56,6 +56,26 @@ func (store *ConfigStore) upsertManyHost(ctx context.Context, hosts []hostUpsert
 	return nil
 }
 
+func (store *ConfigStore) findAllPath(ctx context.Context) ([]model.Path, error) {
+	result := make([]model.Path, 0)
+	statement := Path.SELECT(Path.AllColumns)
+
+	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
+	if err != nil {
+		return result, fmt.Errorf("Error parsing SQL_READ_TIMEOUT: %w", err)
+	}
+
+	queryCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	err = statement.QueryContext(queryCtx, store.SqlPool, &result)
+	if err != nil {
+		return result, fmt.Errorf("Error reading from database: %w", err)
+	}
+
+	return result, nil
+}
+
 func (store *ConfigStore) upsertManyPath(ctx context.Context, paths []pathUpsertMany) error {
 	statement := Path.
 		INSERT(Path.Path, Path.DefaultHost, Path.Description).
