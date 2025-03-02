@@ -17,12 +17,13 @@ type hostTable struct {
 	mysql.Table
 
 	// Columns
-	ID        mysql.ColumnInteger
-	Host      mysql.ColumnString
-	Alias_    mysql.ColumnString
-	IsActive  mysql.ColumnBool
-	CreatedAt mysql.ColumnTimestamp
-	UpdatedAt mysql.ColumnTimestamp
+	ID          mysql.ColumnInteger
+	DomainName  mysql.ColumnString
+	Alias_      mysql.ColumnString
+	Description mysql.ColumnString
+	IsActive    mysql.ColumnBool
+	CreatedAt   mysql.ColumnTimestamp
+	UpdatedAt   mysql.ColumnTimestamp
 
 	AllColumns     mysql.ColumnList
 	MutableColumns mysql.ColumnList
@@ -63,26 +64,28 @@ func newHostTable(schemaName, tableName, alias string) *HostTable {
 
 func newHostTableImpl(schemaName, tableName, alias string) hostTable {
 	var (
-		IDColumn        = mysql.IntegerColumn("id")
-		HostColumn      = mysql.StringColumn("host")
-		Alias_Column    = mysql.StringColumn("alias")
-		IsActiveColumn  = mysql.BoolColumn("is_active")
-		CreatedAtColumn = mysql.TimestampColumn("created_at")
-		UpdatedAtColumn = mysql.TimestampColumn("updated_at")
-		allColumns      = mysql.ColumnList{IDColumn, HostColumn, Alias_Column, IsActiveColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns  = mysql.ColumnList{HostColumn, Alias_Column, IsActiveColumn, CreatedAtColumn, UpdatedAtColumn}
+		IDColumn          = mysql.IntegerColumn("id")
+		DomainNameColumn  = mysql.StringColumn("domain_name")
+		Alias_Column      = mysql.StringColumn("alias")
+		DescriptionColumn = mysql.StringColumn("description")
+		IsActiveColumn    = mysql.BoolColumn("is_active")
+		CreatedAtColumn   = mysql.TimestampColumn("created_at")
+		UpdatedAtColumn   = mysql.TimestampColumn("updated_at")
+		allColumns        = mysql.ColumnList{IDColumn, DomainNameColumn, Alias_Column, DescriptionColumn, IsActiveColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns    = mysql.ColumnList{DomainNameColumn, Alias_Column, DescriptionColumn, IsActiveColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return hostTable{
 		Table: mysql.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:        IDColumn,
-		Host:      HostColumn,
-		Alias_:    Alias_Column,
-		IsActive:  IsActiveColumn,
-		CreatedAt: CreatedAtColumn,
-		UpdatedAt: UpdatedAtColumn,
+		ID:          IDColumn,
+		DomainName:  DomainNameColumn,
+		Alias_:      Alias_Column,
+		Description: DescriptionColumn,
+		IsActive:    IsActiveColumn,
+		CreatedAt:   CreatedAtColumn,
+		UpdatedAt:   UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

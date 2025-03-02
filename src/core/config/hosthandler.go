@@ -52,12 +52,16 @@ func (handler *HostHandler) HandleRegisterHost(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var dto []aliasToHostUpsertMany
-	for k, v := range request {
-		dto = append(dto, aliasToHostUpsertMany{Alias: k, Host: v})
+	var dto []hostUpsertMany
+	for _, host := range request.Hosts {
+		dto = append(dto, hostUpsertMany{
+			DomainName:  host.DomainName,
+			Alias:       host.Alias,
+			Description: host.Description,
+		})
 	}
 
-	err = handler.Store.upsertMany(r.Context(), dto)
+	err = handler.Store.upsertManyHost(r.Context(), dto)
 	if err != nil {
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
 		return

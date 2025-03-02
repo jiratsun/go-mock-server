@@ -12,10 +12,11 @@ import (
 )
 
 type Host struct {
-	ID        int32 `sql:"primary_key"`
-	Host      string
-	Alias     string
-	IsActive  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          int32 `sql:"primary_key"`
+	DomainName  string
+	Alias       string
+	Description *string
+	IsActive    bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

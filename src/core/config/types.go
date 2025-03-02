@@ -31,9 +31,10 @@ type path struct {
 }
 
 // DTO
-type aliasToHostUpsertMany struct {
-	Alias string
-	Host  string
+type hostUpsertMany struct {
+	DomainName  string
+	Alias       string
+	Description string
 }
 
 type pathUpsertMany struct {
@@ -43,7 +44,13 @@ type pathUpsertMany struct {
 }
 
 // Request
-type registerhostRequest map[string]string
+type registerhostRequest struct {
+	Hosts []struct {
+		DomainName  string
+		Alias       string
+		Description string
+	}
+}
 
 type registerPathRequest struct {
 	Paths []struct {

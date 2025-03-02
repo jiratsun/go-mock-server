@@ -12,18 +12,32 @@ import (
 
 func (request registerhostRequest) valid(ctx context.Context) map[string]string {
 	problems := make(map[string]string)
+	hosts := request.Hosts
 
-	for alias, authority := range request {
-		key := fmt.Sprintf("%v: %v", alias, authority)
+	if hosts == nil {
+		problems["hosts"] = "Missing hosts variable"
+	}
 
-		err := validateAuthority(authority)
+	if len(hosts) == 0 {
+		problems["hosts"] = "Empty hosts variable"
+	}
+
+	for _, host := range hosts {
+		err := validateAuthority(host.DomainName)
 		if err != nil {
+			key := fmt.Sprintf("domainName: %v", host.DomainName)
 			problems[key] = err.Error()
 		}
 
-		err = validateAlias(alias)
+		err = validateAlias(host.Alias)
 		if err != nil {
+			key := fmt.Sprintf("alias: %v", host.Alias)
 			problems[key] = err.Error()
+		}
+
+		if len(host.Description) > 255 {
+			key := fmt.Sprintf("description: %v", host.Description)
+			problems[key] = "Invalid description: length should not exceed 255"
 		}
 	}
 
@@ -101,9 +115,13 @@ func validateAlias(alias string) error {
 		return errors.New("Invalid alias: empty")
 	}
 
+	if len(alias) > 255 {
+		return errors.New("Invalid alias: length should not exceed 255")
+	}
+
 	charValidator := regexp.MustCompile(`^([\w\-]*)?$`)
 	if !charValidator.MatchString(alias) {
-		return errors.New("Invalid path: invalid characters")
+		return errors.New("Invalid alias: invalid characters")
 	}
 
 	return nil

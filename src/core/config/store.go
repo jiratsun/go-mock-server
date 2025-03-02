@@ -64,12 +64,10 @@ func (store *ConfigStore) findAllWithPath(ctx context.Context) ([]hostWithPath, 
 	return result, nil
 }
 
-func (store *ConfigStore) upsertMany(ctx context.Context, aliasToHost []aliasToHostUpsertMany) error {
+func (store *ConfigStore) upsertManyHost(ctx context.Context, hosts []hostUpsertMany) error {
 	statement := Host.
-		INSERT(Host.Alias_, Host.Host).
-		MODELS(aliasToHost).
-		AS_NEW().
-		ON_DUPLICATE_KEY_UPDATE(Host.Host.SET(Host.NEW.Host))
+		INSERT(Host.DomainName, Host.Alias_, Host.Description).
+		MODELS(hosts)
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_WRITE_TIMEOUT"))
 	if err != nil {
