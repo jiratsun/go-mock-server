@@ -13,7 +13,41 @@ type HostHandler struct {
 }
 
 func (handler *HostHandler) HandleGetHost(w http.ResponseWriter, r *http.Request) {
-	result, err := handler.Store.findAllHost(r.Context())
+	result, err := handler.Store.findAllHost(r.Context(), nil)
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	response := make(getHostResponse)
+	for _, host := range result {
+		response[host.DomainName] = &hostInfo{
+			Alias: host.Alias, Description: host.Description, IsActive: host.IsActive,
+		}
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))
+}
+
+func (handler *HostHandler) HandleGetActiveHost(w http.ResponseWriter, r *http.Request) {
+	result, err := handler.Store.findAllHost(r.Context(), data.NewTrue())
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	response := make(getHostResponse)
+	for _, host := range result {
+		response[host.DomainName] = &hostInfo{
+			Alias: host.Alias, Description: host.Description, IsActive: host.IsActive,
+		}
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse(nil, response))
+}
+
+func (handler *HostHandler) HandleGetInactiveHost(w http.ResponseWriter, r *http.Request) {
+	result, err := handler.Store.findAllHost(r.Context(), data.NewFalse())
 	if err != nil {
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
 		return

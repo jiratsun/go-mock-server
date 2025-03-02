@@ -17,9 +17,13 @@ type HostStore struct {
 	GetEnv  func(string) string
 }
 
-func (store *HostStore) findAllHost(ctx context.Context) ([]m.Host, error) {
+func (store *HostStore) findAllHost(ctx context.Context, isActive *bool) ([]m.Host, error) {
 	result := make([]m.Host, 0)
 	statement := Host.SELECT(Host.AllColumns)
+
+	if isActive != nil {
+		statement = statement.WHERE(Host.IsActive.EQ(mysql.Bool(*isActive)))
+	}
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
 	if err != nil {

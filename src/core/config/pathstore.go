@@ -17,9 +17,13 @@ type PathStore struct {
 	GetEnv  func(string) string
 }
 
-func (store *PathStore) findAllPath(ctx context.Context) ([]m.Path, error) {
+func (store *PathStore) findAllPath(ctx context.Context, isActive *bool) ([]m.Path, error) {
 	result := make([]m.Path, 0)
 	statement := Path.SELECT(Path.AllColumns)
+
+	if isActive != nil {
+		statement = statement.WHERE(Path.IsActive.EQ(mysql.Bool(*isActive)))
+	}
 
 	timeout, err := time.ParseDuration(store.GetEnv("SQL_READ_TIMEOUT"))
 	if err != nil {
