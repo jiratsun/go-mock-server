@@ -22,6 +22,8 @@ func route(
 		r.Get("/", pathHandler.HandleGetPath)
 		r.Post("/", pathHandler.HandleRegisterPath)
 		r.Delete("/", pathHandler.HandleDeletePath)
+		r.Post("/enable", pathHandler.HandleEnablePath)
+		r.Post("/disable", pathHandler.HandleDisablePath)
 	})
 
 	router.Route("/v1", func(r chi.Router) {

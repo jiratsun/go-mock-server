@@ -117,7 +117,7 @@ func (request registerPathRequest) valid(ctx context.Context) map[string]string 
 	return problems
 }
 
-func (request deletePathRequest) valid(ctx context.Context) map[string]string {
+func (request modifyPathRequest) valid(ctx context.Context) map[string]string {
 	problems := make(map[string]string)
 	paths := request.Paths
 

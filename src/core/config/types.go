@@ -25,7 +25,7 @@ type pathUpsertMany struct {
 	Description string
 }
 
-type pathDeleteMany struct {
+type pathModifyMany struct {
 	Path []string
 }
 
@@ -53,7 +53,7 @@ type registerPathRequest struct {
 	}
 }
 
-type deletePathRequest struct {
+type modifyPathRequest struct {
 	Paths []struct {
 		Path *string
 	}

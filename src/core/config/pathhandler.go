@@ -62,7 +62,7 @@ func (handler *PathHandler) HandleRegisterPath(w http.ResponseWriter, r *http.Re
 }
 
 func (handler *PathHandler) HandleDeletePath(w http.ResponseWriter, r *http.Request) {
-	request, err := data.Decode[deletePathRequest](r)
+	request, err := data.Decode[modifyPathRequest](r)
 	if err != nil {
 		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
 		return
@@ -82,7 +82,67 @@ func (handler *PathHandler) HandleDeletePath(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	err = handler.Store.deleteManyPath(r.Context(), pathDeleteMany{Path: paths})
+	err = handler.Store.deleteManyPath(r.Context(), pathModifyMany{Path: paths})
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse[any](nil, nil))
+}
+
+func (handler *PathHandler) HandleEnablePath(w http.ResponseWriter, r *http.Request) {
+	request, err := data.Decode[modifyPathRequest](r)
+	if err != nil {
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	problems := request.valid(r.Context())
+	if len(problems) > 0 {
+		err = errors.New("Invalid request body")
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, problems, nil))
+		return
+	}
+
+	var paths []string
+	for _, path := range request.Paths {
+		if path.Path != nil {
+			paths = append(paths, *path.Path)
+		}
+	}
+
+	err = handler.Store.toggleManyPath(r.Context(), pathModifyMany{Path: paths}, true)
+	if err != nil {
+		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	data.Encode(w, http.StatusOK, data.SuccessResponse[any](nil, nil))
+}
+
+func (handler *PathHandler) HandleDisablePath(w http.ResponseWriter, r *http.Request) {
+	request, err := data.Decode[modifyPathRequest](r)
+	if err != nil {
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, nil, nil))
+		return
+	}
+
+	problems := request.valid(r.Context())
+	if len(problems) > 0 {
+		err = errors.New("Invalid request body")
+		data.Encode(w, http.StatusBadRequest, data.ErrorResponse[any](err, problems, nil))
+		return
+	}
+
+	var paths []string
+	for _, path := range request.Paths {
+		if path.Path != nil {
+			paths = append(paths, *path.Path)
+		}
+	}
+
+	err = handler.Store.toggleManyPath(r.Context(), pathModifyMany{Path: paths}, false)
 	if err != nil {
 		data.Encode(w, http.StatusInternalServerError, data.ErrorResponse[any](err, nil, nil))
 		return
