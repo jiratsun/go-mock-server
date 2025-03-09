@@ -15,3 +15,18 @@ func ForEach[T any](input []T, f func(T)) {
 		f(v)
 	}
 }
+
+func Default[T any](v *T, def T) T {
+	if v == nil {
+		return def
+	}
+
+	return *v
+}
+
+func Left(s string, num int) string {
+	if len(s) > num {
+		return s[:num]
+	}
+	return s
+}
