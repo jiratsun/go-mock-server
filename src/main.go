@@ -9,11 +9,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"mockserver.jiratviriyataranon.io/src/config"
-	configuration "mockserver.jiratviriyataranon.io/src/core/config"
-	initialize "mockserver.jiratviriyataranon.io/src/initializer"
+	"mockserver.jiratviriyataranon.io/src/initializer"
 )
 
 func main() {
@@ -41,7 +39,7 @@ func run(ctx context.Context, getEnv func(string) string) error {
 	serverCtx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
-	handler, err := initializeHandler(serverCtx, getEnv)
+	handler, err := initializer.InitHandler(serverCtx, getEnv)
 	if err != nil {
 		return fmt.Errorf("Error setting up handler: %w", err)
 	}
@@ -77,23 +75,4 @@ func run(ctx context.Context, getEnv func(string) string) error {
 
 	fmt.Println("Server shut down")
 	return nil
-}
-
-func initializeHandler(ctx context.Context, getEnv func(string) string) (http.Handler, error) {
-	sqlPool, err := initialize.SqlPool(ctx, getEnv)
-	if err != nil {
-		return nil, fmt.Errorf("Error setting up SQL: %w", err)
-	}
-
-	hostStore := &configuration.HostStore{SqlPool: sqlPool, GetEnv: getEnv}
-	pathStore := &configuration.PathStore{SqlPool: sqlPool, GetEnv: getEnv}
-
-	hostHandler := &configuration.HostHandler{Store: hostStore}
-	pathHandler := &configuration.PathHandler{Store: pathStore}
-
-	return route(
-		chi.NewRouter(),
-		hostHandler,
-		pathHandler,
-	), nil
 }

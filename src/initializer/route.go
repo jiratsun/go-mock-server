@@ -1,4 +1,4 @@
-package main
+package initializer
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"mockserver.jiratviriyataranon.io/src/core/config"
 )
 
-func route(
+func initRoute(
 	router chi.Router,
 	hostHandler *config.HostHandler,
 	pathHandler *config.PathHandler,

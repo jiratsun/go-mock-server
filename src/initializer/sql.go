@@ -1,4 +1,4 @@
-package initialize
+package initializer
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"mockserver.jiratviriyataranon.io/src/config"
 )
 
-func SqlPool(ctx context.Context, getEnv func(string) string) (*sql.DB, error) {
+func initSqlPool(ctx context.Context, getEnv func(string) string) (*sql.DB, error) {
 	sqlConfig, err := config.Sql(getEnv)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting SQL configs: %w", err)
