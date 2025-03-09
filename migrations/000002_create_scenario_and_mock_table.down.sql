@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS scenario;
+
+DROP TABLE IF EXISTS mock;
