@@ -13,7 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	"mockserver.jiratviriyataranon.io/src/config"
 	configuration "mockserver.jiratviriyataranon.io/src/core/config"
-	"mockserver.jiratviriyataranon.io/src/initialize"
+	initialize "mockserver.jiratviriyataranon.io/src/initializer"
 )
 
 func main() {
